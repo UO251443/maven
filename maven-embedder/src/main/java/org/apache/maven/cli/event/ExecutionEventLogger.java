@@ -135,10 +135,55 @@ public class ExecutionEventLogger
 
             logResult( event.getSession() );
 
+            logVersion( event.getSession() );
+
             logStats( event.getSession() );
 
             infoLine( '-' );
+
         }
+    }
+
+    private void logVersion( MavenSession session )
+    {
+        if ( logger.isInfoEnabled() )
+        {
+
+            infoLine( '-' );
+
+            logger.info( "" );
+
+            infoMain( "Version Summary:" );
+
+            logger.info( "" );
+
+            if ( session.getProjects().size() > 1 )
+            {
+                final MavenProject topLevelProject = session.getTopLevelProject(); 
+                final String topLevelVersion = topLevelProject.getVersion();
+                final List<MavenProject> projects = session.getProjects();
+                formatSingeVersionLine( topLevelProject );
+                for ( MavenProject project : projects )
+                {
+                    if ( !topLevelProject.equals( project ) && !topLevelVersion.equals( project.getVersion() ) )
+                    {
+                        formatSingeVersionLine( project );
+                    }
+                }
+            }
+            else
+            {
+                formatSingeVersionLine( session.getTopLevelProject() );
+            }
+
+        }
+
+    }
+
+    private void formatSingeVersionLine( MavenProject project )
+    {
+        int len = LINE_LENGTH - project.getName().length() - project.getVersion().length() - 2;
+        logger.info( project.getName() + chars( ' ', ( len > 0 ) ? len : 1 ) + '[' + project.getVersion() + ']' );
     }
 
     private void logReactorSummary( MavenSession session )
